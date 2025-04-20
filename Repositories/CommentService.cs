@@ -93,7 +93,7 @@ namespace bookstore.storeBackNet.Repositories
 
         var result = await connection.QueryAsync(
             query,
-            new { search = $"%{commentId}%" }
+            new { commentId = $"%{commentId}%" }
         );
 
         return new ResponseResult

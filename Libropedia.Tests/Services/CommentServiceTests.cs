@@ -101,13 +101,13 @@ namespace Libropedia.Tests.Services
 //                 var mockConnectionFactory = new Mock<IDbConnectionFactory>();
 // mockConnectionFactory.Setup(c => c.CreateConnection()).Returns(() => new Mock<IDbConnection>().Object);
 
-                _wrapperMock.Setup(x => x.QueryAsync<dynamic>(
+                _wrapperMock.Setup(x => x.QueryAsync<int>(
                     connection,
         It.IsAny<string>(),
         It.IsAny<object>(),
     
-        It.IsAny<CommandType?>()))
-    .ReturnsAsync(new List<dynamic>());
+        null))
+    .ReturnsAsync(new List<int> { 1 });
 
             // Act
             var result = await _commentService.DeleteComment(commentId);

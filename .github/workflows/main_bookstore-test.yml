@@ -41,7 +41,7 @@ jobs:
           if-no-files-found: warn
 
       - name: 'Publish Azure Functions Project'
-        run: dotnet publish ${{ env.FUNCTION_APP_PROJECT_PATH }} --configuration Release --output ./output --self-contained false --no-restore
+        run: dotnet publish ${{ env.FUNCTION_APP_PROJECT_PATH }} --configuration Release --output ./output --self-contained false 
 
       - name: Login to Azure
         uses: azure/login@v2

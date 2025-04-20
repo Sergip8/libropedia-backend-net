@@ -1,4 +1,4 @@
-name: Build and deploy dotnet core app to Azure Function App - bookstore-test # Probablemente quieras renombrar esto a algo como Libropedia
+name: Build and deploy dotnet core app to Azure Function App - bookstore-test 
 
 on:
   push:
@@ -7,10 +7,9 @@ on:
   workflow_dispatch:
 
 env:
-  DOTNET_VERSION: '8.0.x' # Verifica versión LTS o soportada
-  SOLUTION_FILE_PATH: 'Libropedia.sln' # <-- NUEVO: Ruta al archivo .sln (ajusta si no está en la raíz o tiene otro nombre)
-  FUNCTION_APP_PROJECT_PATH: 'Libropedia.Api/Libropedia.Api.csproj' # <-- AJUSTA: Ruta relativa desde la raíz al .csproj de TU Function App
-
+  DOTNET_VERSION: '9.0.x'
+  SOLUTION_FILE_PATH: 'Libropedia.sln'
+  FUNCTION_APP_PROJECT_PATH: 'Libropedia.csproj' 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -27,14 +26,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # --- PASO AJUSTADO ---
       - name: 'Restore Dependencies for Solution'
-        # Restaura para toda la solución para obtener dependencias de app y tests
         run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
-
-      # --- PASO AJUSTADO ---
       - name: 'Run Tests'
-        # Ejecuta tests para toda la solución. 'dotnet test' en el .sln encontrará Libropedia.Tests
         run: dotnet test ${{ env.SOLUTION_FILE_PATH }} --configuration Release --no-restore --logger "trx;LogFileName=test_results.trx"
 
       - name: 'Publish Test Results'
@@ -46,16 +40,12 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      # --- PASO AJUSTADO ---
       - name: 'Publish Azure Functions Project'
-        # Publica SOLAMENTE el proyecto de la Function App, usando su .csproj específico
         run: dotnet publish ${{ env.FUNCTION_APP_PROJECT_PATH }} --configuration Release --output ./output --self-contained false --no-restore
-        # NOTA: El output sigue siendo './output' en la raíz del workspace
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          # Tus secrets aquí
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_030DBD2EB16542FB9BF29C5BB2A1DBD3 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C7494FA1BBE9407C8D593F062314A3E8 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_469BFFACAD854D1886B456969756E1D9 }}
@@ -64,7 +54,6 @@ jobs:
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'bookstore-test' # Asegúrate que este sea el nombre correcto de tu Function App en Azure
+          app-name: 'bookstore-test'
           slot-name: 'Production'
-          # La ruta del paquete sigue siendo 'output' relativo a la raíz del workspace
           package: 'output'

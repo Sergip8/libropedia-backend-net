@@ -1,6 +1,7 @@
 using System.Data;
 using Api.FunctionApp.DataContext;
 using bookstore.Repositories.Interfaces;
+using bookstore.storeBackNet.DataContext;
 using bookstore.storeBackNet.Models.Request;
 using bookstore.storeBackNet.Models.Response;
 using Consultorio.Function.Models;
@@ -12,11 +13,12 @@ namespace bookstore.storeBackNet.Repositories
     public class CommentService : ICommentInterface
     {
 
-        private readonly DapperContext _context;
-       
-        public CommentService(DapperContext context)
+        private readonly IDapperContext _context;
+       private readonly IDapperWrapper _wrapper;
+        public CommentService(IDapperContext context, IDapperWrapper wrapper)
     {
         _context = context;
+        _wrapper = wrapper;
   
     }
 
@@ -30,7 +32,8 @@ namespace bookstore.storeBackNet.Repositories
             parameters.Add("p_calificacion", comment.Calificacion, DbType.Int32);
             parameters.Add("p_comentario", comment.Comentario, DbType.String);
 
-            var result = await connection.ExecuteAsync(
+            var result = await _wrapper.ExecuteAsync(
+                connection,
                 "sp_agregar_resena",
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -52,7 +55,8 @@ namespace bookstore.storeBackNet.Repositories
             parameters.Add("p_nuevo_comentario", comment.Comentario, DbType.String);
             parameters.Add("p_nueva_calificacion", comment.Calificacion, DbType.Int32);
 
-            var result = await connection.ExecuteAsync(
+            var result = await _wrapper.ExecuteAsync(
+                connection,
                 "sp_actualizar_resena",
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -91,7 +95,8 @@ namespace bookstore.storeBackNet.Repositories
             WHERE id_resena = @commentId
             ";
 
-        var result = await connection.QueryAsync(
+        var result = await _wrapper.QueryAsync<int>(
+            connection,
             query,
             new { commentId = $"%{commentId}%" }
         );

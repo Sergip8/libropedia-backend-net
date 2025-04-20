@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using Api.FunctionApp.DataContext;
 using bookstore.Repositories.Interfaces;
+using bookstore.storeBackNet.DataContext;
 using bookstore.storeBackNet.Repositories;
 using bookstore.storeBackNet.Repositories.Interfaces;
 using EventManagementSystem.Helpers;
@@ -117,14 +118,9 @@ var host = new HostBuilder()
         services.AddScoped<IAuthorInterface, AuthorService>();
         services.AddScoped<ICommentInterface, CommentService>();
 
+        services.AddSingleton<IDapperContext, DapperContext>();
+        services.AddSingleton<IDapperWrapper, DapperWrapper>();
 
-      
-
-
-
-
-
-        services.AddSingleton<DapperContext>();
     })
    
     .Build();

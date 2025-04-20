@@ -7,20 +7,26 @@ using ConsultorioNet.Models.Request;
 using EventManagementSystem.Helpers;
 using System.Data;
 using Dapper;
+using bookstore.storeBackNet.DataContext;
 
 namespace Libropedia.Tests.Services
 {
     public class UserServiceTests
     {
-        private readonly Mock<DapperContext> _contextMock;
-        private readonly Mock<JwtSettings> _jwtSettingsMock;
+        private readonly Mock<IDapperContext> _contextMock;
+        private readonly JwtSettings _jwtSettings;
+        private readonly Mock<IDapperWrapper> _wrapperMock;
         private readonly UserService _userService;
 
         public UserServiceTests()
         {
-            _contextMock = new Mock<DapperContext>();
-            _jwtSettingsMock = new Mock<JwtSettings>();
-            _userService = new UserService(_contextMock.Object, _jwtSettingsMock.Object);
+            _contextMock = new Mock<IDapperContext>();
+            _jwtSettings = new JwtSettings{
+                SecretKey = "holaEstoEsUnaKayPrivadaParaTestear",
+                TokenExpirationInMinutes = 60
+            };
+            _wrapperMock = new Mock<IDapperWrapper>();
+            _userService = new UserService(_contextMock.Object, _jwtSettings, _wrapperMock.Object);
         }
 
         [Fact]
@@ -34,15 +40,14 @@ namespace Libropedia.Tests.Services
                 Username = "testuser"
             };
 
-            var connection = new Mock<IDbConnection>();
-            _contextMock.Setup(x => x.CreateConnection())
-                .Returns(connection.Object);
+           var connection = new Mock<IDbConnection>().Object;
+          _contextMock.Setup(x => x.CreateConnection())
+        .Returns(connection);
 
-            connection.Setup(x => x.ExecuteAsync(
+            _wrapperMock.Setup(x => x.ExecuteAsync(
+                connection,
                 It.IsAny<string>(),
                 It.IsAny<object>(),
-                null,
-                null,
                 CommandType.StoredProcedure))
                 .ReturnsAsync(1);
 
@@ -73,20 +78,18 @@ namespace Libropedia.Tests.Services
                 Is_active = "1"
             };
 
-            var connection = new Mock<IDbConnection>();
-            _contextMock.Setup(x => x.CreateConnection())
-                .Returns(connection.Object);
+              var connection = new Mock<IDbConnection>().Object;
+          _contextMock.Setup(x => x.CreateConnection())
+        .Returns(connection);
 
-            connection.Setup(x => x.QueryFirstOrDefaultAsync<ConsultorioNet.Models.Response.UserResponse>(
+            _wrapperMock.Setup(x => x.QueryFirstOrDefaultAsync<ConsultorioNet.Models.Response.UserResponse>(
+                connection,
                 It.IsAny<string>(),
                 It.IsAny<object>(),
-                null,
-                null,
                 CommandType.StoredProcedure))
                 .ReturnsAsync(userResponse);
 
-            _jwtSettingsMock.SetupGet(x => x.SecretKey).Returns("your-secret-key-here");
-            _jwtSettingsMock.SetupGet(x => x.TokenExpirationInMinutes).Returns(60);
+     
 
             // Act
             var result = await _userService.LoginAsync(loginRequest);

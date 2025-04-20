@@ -56,25 +56,6 @@ namespace Libropedia.Tests.Helpers
                 .ReturnsAsync(expectedResult);
         }
 
-        public static Mock<GridReader> CreateMockGridReader<T1, T2>(IEnumerable<T1> firstResult, IEnumerable<T2> secondResult)
-        {
-            var mockGridReader = new Mock<GridReader>();
-            mockGridReader.Setup(x => x.ReadAsync<T1>())
-                .ReturnsAsync(firstResult);
-            mockGridReader.Setup(x => x.ReadAsync<T2>())
-                .ReturnsAsync(secondResult);
-            return mockGridReader;
-        }
-
-        public static void SetupQueryMultipleAsync(Mock<IDbConnection> connectionMock, GridReader gridReader)
-        {
-            connectionMock.Setup(x => x.QueryMultipleAsync(
-                It.IsAny<string>(),
-                It.IsAny<object>(),
-                null,
-                null,
-                It.IsAny<CommandType>()))
-                .ReturnsAsync(gridReader);
-        }
+      
     }
 }

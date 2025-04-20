@@ -7,18 +7,21 @@ using ConsultorioNet.Models.Request;
 using ConsultorioNet.Models.Response;
 using System.Data;
 using Dapper;
+using bookstore.storeBackNet.DataContext;
 
 namespace Libropedia.Tests.Services
 {
     public class CategoryServiceTests
     {
-        private readonly Mock<DapperContext> _contextMock;
+        private readonly Mock<IDapperContext> _contextMock;
+        private readonly Mock<IDapperWrapper> _wrapperMock;
         private readonly CategoryService _categoryService;
 
         public CategoryServiceTests()
         {
-            _contextMock = new Mock<DapperContext>();
-            _categoryService = new CategoryService(_contextMock.Object);
+            _contextMock = new Mock<IDapperContext>();
+             _wrapperMock = new Mock<IDapperWrapper>();
+            _categoryService = new CategoryService(_contextMock.Object, _wrapperMock.Object);
         }
 
         [Fact]
@@ -45,14 +48,17 @@ namespace Libropedia.Tests.Services
                 }
             };
 
-            var connection = new Mock<IDbConnection>();
-            _contextMock.Setup(x => x.CreateConnection())
-                .Returns(connection.Object);
+    var connection = new Mock<IDbConnection>().Object;
+          _contextMock.Setup(x => x.CreateConnection())
+        .Returns(connection);
 
-            connection.Setup(x => x.QueryAsync<FilterResponse>(
-                It.IsAny<string>(),
-                It.IsAny<object>()))
-                .ReturnsAsync(expectedCategories);
+   _wrapperMock.Setup(x => x.QueryAsync<FilterResponse>(
+    connection,
+    It.IsAny<string>(),
+    It.IsAny<object>(),
+   
+    null)) 
+    .ReturnsAsync(expectedCategories);
 
             // Act
             var result = await _categoryService.FilterCategory(request);
@@ -83,15 +89,17 @@ namespace Libropedia.Tests.Services
                 new FilterResponse { Id = 5, Value = "Technology" }
             };
 
-            var connection = new Mock<IDbConnection>();
-            _contextMock.Setup(x => x.CreateConnection())
-                .Returns(connection.Object);
+           var connection = new Mock<IDbConnection>().Object;
+          _contextMock.Setup(x => x.CreateConnection())
+        .Returns(connection);
 
-            connection.Setup(x => x.QueryAsync<FilterResponse>(
-                It.IsAny<string>(),
-                It.IsAny<object>()))
-                .ReturnsAsync(expectedCategories);
-
+_wrapperMock.Setup(x => x.QueryAsync<FilterResponse>(
+    connection,
+    It.IsAny<string>(),
+    It.IsAny<object>(),
+   
+    null)) 
+    .ReturnsAsync(expectedCategories);
             // Act
             var result = await _categoryService.FilterCategory(request);
 

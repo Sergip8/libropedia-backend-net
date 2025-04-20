@@ -2,6 +2,7 @@
 using System.Data;
 using Api.FunctionApp.DataContext;
 using bookstore.Repositories.Interfaces;
+using bookstore.storeBackNet.DataContext;
 using ConsultorioNet.Models.Request;
 using ConsultorioNet.Models.Response;
 using Dapper;
@@ -11,11 +12,13 @@ namespace bookstore.storeBackNet.Repositories
     public class AuthorService : IAuthorInterface
     {
 
-        private readonly DapperContext _context;
+        private readonly IDapperContext _context;
 
-        public AuthorService(DapperContext context)
+        private readonly IDapperWrapper _wrapper;
+        public AuthorService(IDapperContext context, IDapperWrapper wrapper)
         {
             _context = context;
+            _wrapper = wrapper;
 
         }
 
@@ -33,7 +36,8 @@ namespace bookstore.storeBackNet.Repositories
                     LIMIT @limit
                 ";
 
-                var result = await connection.QueryAsync<FilterResponse>(
+                var result = await _wrapper.QueryAsync<FilterResponse>(
+                    connection,
                     query,
                     new { search = $"%{search.search}%", limit = search.limit }
                 );

@@ -3,6 +3,7 @@
 using System.Data;
 using Api.FunctionApp.DataContext;
 using bookstore.Repositories.Interfaces;
+using bookstore.storeBackNet.DataContext;
 using bookstore.storeBackNet.Models.Request;
 using bookstore.storeBackNet.Models.Response;
 using ConsultorioNet.Models.Response;
@@ -14,11 +15,14 @@ namespace bookstore.storeBackNet.Repositories
     public class BookService : IBookInterface
     {
 
-        private readonly DapperContext _context;
+        private readonly IDapperContext _context;
+         private readonly IDapperWrapper _wrapper;
        
-        public BookService(DapperContext context)
+        public BookService(IDapperContext context, IDapperWrapper wrapper)
     {
         _context = context;
+        _wrapper = wrapper;
+
   
     }
 
@@ -130,7 +134,8 @@ namespace bookstore.storeBackNet.Repositories
             parameters.Add("p_limite", limit, DbType.Int16);
         
 
-            return connection.QueryAsync<BookResponse>(
+            return _wrapper.QueryAsync<BookResponse>(
+                connection,
                 "sp_obtener_top_libros_calificados",
                 parameters,
                 commandType: CommandType.StoredProcedure

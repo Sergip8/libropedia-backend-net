@@ -2,6 +2,7 @@
 using System.Data;
 using Api.FunctionApp.DataContext;
 using bookstore.Repositories.Interfaces;
+using bookstore.storeBackNet.DataContext;
 using ConsultorioNet.Models.Request;
 using ConsultorioNet.Models.Response;
 using Dapper;
@@ -11,11 +12,12 @@ namespace bookstore.storeBackNet.Repositories
     public class CategoryService : ICategoryInterface
     {
 
-        private readonly DapperContext _context;
-
-        public CategoryService(DapperContext context)
+        private readonly IDapperContext _context;
+        private readonly IDapperWrapper _wrapper;
+        public CategoryService(IDapperContext context, IDapperWrapper wrapper)
         {
             _context = context;
+            _wrapper = wrapper;
 
         }
 
@@ -31,7 +33,8 @@ namespace bookstore.storeBackNet.Repositories
             ORDER BY nombre
             ";
 
-        var result = await connection.QueryAsync<FilterResponse>(
+        var result = await _wrapper.QueryAsync<FilterResponse>(
+            connection,
             query,
             new { search = $"%{search.search}%" }
         );

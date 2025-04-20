@@ -26,8 +26,12 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: 'Clean Solution'
+        run: dotnet clean ${{ env.SOLUTION_FILE_PATH }} --configuration Release
+
       - name: 'Restore Dependencies for Solution'
         run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
+
       - name: 'Run Tests'
         run: dotnet test ${{ env.SOLUTION_FILE_PATH }} --configuration Release --logger "trx;LogFileName=test_results.trx"
 

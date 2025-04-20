@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy dotnet core app to Azure Function App - bookstore-test
+name: Build and deploy dotnet core app to Azure Function App - bookstore-test # Probablemente quieras renombrar esto a algo como Libropedia
 
 on:
   push:
@@ -10,48 +7,55 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '9.0.x' # set this to the dotnet version to use
+  DOTNET_VERSION: '8.0.x' # Verifica versión LTS o soportada
+  SOLUTION_FILE_PATH: 'Libropedia.sln' # <-- NUEVO: Ruta al archivo .sln (ajusta si no está en la raíz o tiene otro nombre)
+  FUNCTION_APP_PROJECT_PATH: 'Libropedia.Api/Libropedia.Api.csproj' # <-- AJUSTA: Ruta relativa desde la raíz al .csproj de TU Function App
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v4
+
       - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}      
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # --- PASO AJUSTADO ---
+      - name: 'Restore Dependencies for Solution'
+        # Restaura para toda la solución para obtener dependencias de app y tests
+        run: dotnet restore ${{ env.SOLUTION_FILE_PATH }}
+
+      # --- PASO AJUSTADO ---
       - name: 'Run Tests'
-        shell: pwsh
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet test --configuration Release --logger "trx;LogFileName=test_results.trx"
-          popd      
+        # Ejecuta tests para toda la solución. 'dotnet test' en el .sln encontrará Libropedia.Tests
+        run: dotnet test ${{ env.SOLUTION_FILE_PATH }} --configuration Release --no-restore --logger "trx;LogFileName=test_results.trx"
+
       - name: 'Publish Test Results'
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: '**/*.trx'
-          retention-days: 30
+          retention-days: 7
           if-no-files-found: warn
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: pwsh
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
-      
+      # --- PASO AJUSTADO ---
+      - name: 'Publish Azure Functions Project'
+        # Publica SOLAMENTE el proyecto de la Function App, usando su .csproj específico
+        run: dotnet publish ${{ env.FUNCTION_APP_PROJECT_PATH }} --configuration Release --output ./output --self-contained false --no-restore
+        # NOTA: El output sigue siendo './output' en la raíz del workspace
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
+          # Tus secrets aquí
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_030DBD2EB16542FB9BF29C5BB2A1DBD3 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C7494FA1BBE9407C8D593F062314A3E8 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_469BFFACAD854D1886B456969756E1D9 }}
@@ -60,7 +64,7 @@ jobs:
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'bookstore-test'
+          app-name: 'bookstore-test' # Asegúrate que este sea el nombre correcto de tu Function App en Azure
           slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+          # La ruta del paquete sigue siendo 'output' relativo a la raíz del workspace
+          package: 'output'

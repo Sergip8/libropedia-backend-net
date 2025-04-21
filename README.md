@@ -4,7 +4,7 @@ Proyecto backend desarrollado con **Azure Functions en .NET 9**, diseñado para 
 
 ---
 
-# Documentación Técnica - Proyecto Libropedia
+# Descripción Técnica - Proyecto Libropedia
 
 ## Descripción General
 Libropedia es una API REST desarrollada con Azure Functions en .NET 9, diseñada para gestionar una biblioteca digital. El proyecto implementa una arquitectura serverless y utiliza autenticación JWT para proteger sus endpoints.

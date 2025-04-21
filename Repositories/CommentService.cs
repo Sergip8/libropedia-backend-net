@@ -86,31 +86,28 @@ namespace bookstore.storeBackNet.Repositories
     
      public async Task<ResponseResult> DeleteComment(int commentId)
 {
-    // Use 'using var' for automatic disposal of the connection
+
     using var connection = _context.CreateConnection();
     try
     {
         var query = @"
             DELETE  
             FROM resenas 
-            WHERE id_resena = @CommentId -- Parameter name can match the property name for clarity
+            WHERE id_resena = @CommentId 
             ";
 
-        // Use ExecuteAsync for non-query operations (DELETE)
-        // Pass the integer parameter directly
         var affectedRows = await _wrapper.ExecuteAsync(
             connection,
             query,
-            new { CommentId = commentId } // Pass the integer value
+            new { CommentId = commentId } 
         );
 
-        // Check if any rows were affected to confirm deletion
         if (affectedRows > 0)
         {
             return new ResponseResult
             {
                 IsError = false,
-                Message = "Reseña eliminada exitosamente."
+                Message = "Reseña eliminada"
             };
         }
         else
@@ -125,13 +122,10 @@ namespace bookstore.storeBackNet.Repositories
     }
     catch (Exception ex)
     {
-        // Better error handling: just re-throw or log and re-throw
-        // Log the exception here (using a logger, not just Console.WriteLine)
-        // For simplicity, we'll just re-throw while preserving the stack trace
-        // You could also throw a custom exception here if needed
-        throw; // Re-throws the original exception preserving its stack trace
+       
+        throw; 
     }
-    // No finally block needed because of 'using var'
+   
 }
     }
     }

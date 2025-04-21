@@ -89,33 +89,32 @@ namespace Libropedia.Tests.Services
             result.Message.Should().Be("Comentario modificado");
         }
 
-      
-        [Fact]
-        public async Task DeleteComment_ShouldReturnSuccess()
-        {
-            // Arrange
-            int commentId = 1;
-           var connection = new Mock<IDbConnection>().Object;
+      [Fact]
+public async Task DeleteComment_ShouldReturnSuccess_WhenCommentIsDeleted()
+{
+    // Arrange
+    var commentId = 123;
+   var connection = new Mock<IDbConnection>().Object;
           _contextMock.Setup(x => x.CreateConnection())
         .Returns(connection);
-//                 var mockConnectionFactory = new Mock<IDbConnectionFactory>();
-// mockConnectionFactory.Setup(c => c.CreateConnection()).Returns(() => new Mock<IDbConnection>().Object);
 
-                _wrapperMock.Setup(x => x.QueryAsync<int>(
-                    connection,
+    var wrapperMock = new Mock<IDapperWrapper>();
+    _wrapperMock.Setup(w => w.ExecuteAsync(
+        connection,
         It.IsAny<string>(),
         It.IsAny<object>(),
-    
-        null))
-    .ReturnsAsync(new List<int> { 1 });
+        null
+    )).ReturnsAsync(1); // simulate 1 row affected
 
-            // Act
-            var result = await _commentService.DeleteComment(commentId);
+   
 
-            // Assert
-            result.Should().NotBeNull();
-            result.IsError.Should().BeFalse();
-            result.Message.Should().Be("Reseña eliminada");
-        }
+    // Act
+    var result = await _commentService.DeleteComment(commentId);
+
+    // Assert
+    result.Should().NotBeNull();
+    result.IsError.Should().BeFalse();
+    result.Message.Should().Be("Reseña eliminada");
+}
     }
 }

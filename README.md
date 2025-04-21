@@ -115,6 +115,43 @@ El proyecto sigue una arquitectura en capas bien definida:
 - Manejo de errores consistente
 - Documentación de código mediante comentarios
 
+### 7. Pruebas
+Configuración de Pruebas
+El proyecto incluye un conjunto de pruebas unitarias implementadas con xUnit, Moq y FluentAssertions. Estas pruebas están diseñadas para garantizar la funcionalidad de los servicios principales y la lógica de negocio.
 
+#### Ejecución de Pruebas
+Para ejecutar las pruebas, utiliza el siguiente comando:
+- dotnet test
 
+#### Cobertura de Pruebas
+Las pruebas cubren los siguientes servicios:
 
+- AuthorService: Filtrado de autores
+- BookService: Gestión de libros
+- CategoryService: Filtrado de categorías
+- CommentService: Gestión de reseñas
+- UserService: Registro y autenticación de usuarios
+
+### 8. Instalación y Ejecución
+#### Requisitos Previos
+- .NET 9 SDK: Asegúrate de tener instalado el SDK de .NET 9.
+- MySQL: Configura una base de datos MySQL y actualiza la cadena de conexión en local.settings.json.
+- Azure Functions Core Tools: Instala las herramientas de Azure Functions para ejecutar el proyecto localmente.
+
+Pasos para Instalar
+1. Clona el repositorio:
+    ```bash
+    git clone https://github.com/Sergip8/libropedia-backend-net.git
+2. Restaura las dependencias:
+    ```bash
+    dotnet restore
+3. Configura la base de datos:
+
+- Crea las tablas necesarias ejecutando el script database.sql.
+- Actualiza la cadena de conexión en local.settings.json.
+Ejecución del Proyecto
+
+#### Ejecución del Proyecto
+1. Ejecuta el proyecto localmente:
+    ```bash
+    func start

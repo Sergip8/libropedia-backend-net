@@ -86,36 +86,52 @@ namespace bookstore.storeBackNet.Repositories
     
      public async Task<ResponseResult> DeleteComment(int commentId)
 {
+    // Use 'using var' for automatic disposal of the connection
     using var connection = _context.CreateConnection();
     try
     {
         var query = @"
             DELETE  
             FROM resenas 
-            WHERE id_resena = @commentId
+            WHERE id_resena = @CommentId -- Parameter name can match the property name for clarity
             ";
 
-        var result = await _wrapper.QueryAsync<int>(
+        // Use ExecuteAsync for non-query operations (DELETE)
+        // Pass the integer parameter directly
+        var affectedRows = await _wrapper.ExecuteAsync(
             connection,
             query,
-            new { commentId = $"%{commentId}%" }
+            new { CommentId = commentId } // Pass the integer value
         );
 
-        return new ResponseResult
+        // Check if any rows were affected to confirm deletion
+        if (affectedRows > 0)
         {
-            IsError = false,
-            Message = "Reseña eliminada"
-        };
+            return new ResponseResult
+            {
+                IsError = false,
+                Message = "Reseña eliminada exitosamente."
+            };
+        }
+        else
+        {
+            // No rows affected means the comment ID wasn't found
+            return new ResponseResult
+            {
+                IsError = true, // It's an error/issue if the comment wasn't found for deletion
+                Message = $"Reseña con ID {commentId} no encontrada."
+            };
+        }
     }
     catch (Exception ex)
     {
-        throw new Exception("Error deleting commnt", ex);
+        // Better error handling: just re-throw or log and re-throw
+        // Log the exception here (using a logger, not just Console.WriteLine)
+        // For simplicity, we'll just re-throw while preserving the stack trace
+        // You could also throw a custom exception here if needed
+        throw; // Re-throws the original exception preserving its stack trace
     }
-    finally
-    {
-        if (connection.State == ConnectionState.Open)
-            connection.Close();
-    }
+    // No finally block needed because of 'using var'
 }
     }
     }
